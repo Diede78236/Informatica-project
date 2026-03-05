@@ -1,0 +1,154 @@
+import random
+import pygame
+
+pygame.init()
+
+win = pygame.display.set_mode((800, 600))
+pygame.display.set_caption("rivierBotsing")
+
+font = pygame.font.Font('freesansbold.ttf', 42)
+
+x3 = 0
+y3 = 30
+height3 = 30
+width3 = 800
+
+punten = 0
+x = 50
+y = 50
+width = 40
+height = 60
+vel = 5
+gameover = False
+
+# Zwaartekracht variabelen
+gravity = 0.5
+vel_y = 0
+on_ground = False
+grond = 550
+
+# Platform 1
+platform_x = 100
+platform_y = 450
+platform_width = 200
+platform_height = 20
+
+# Platform 2
+platform_x2 = 500
+platform_y2 = 350
+platform_width2 = 200
+platform_height2 = 20
+
+x2 = 200
+y2 = 200
+width2 = 20
+height2 = 20
+
+teller = 0
+
+run = True
+while run:
+    if gameover == False:
+        win.fill((135, 206, 235))
+        pygame.time.delay(30)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            x -= vel
+        if keys[pygame.K_RIGHT]:
+            x += vel
+
+            # Springen als de speler op de grond staat
+        if keys[pygame.K_UP] and on_ground:
+            vel_y = -12
+
+            # Zwaartekracht toepassen
+        vel_y += gravity
+        y += vel_y
+
+        on_ground = False
+
+        # Grond collision
+        if y + height >= grond:
+            y = grond - height
+            vel_y = 0
+            on_ground = True
+
+            # Platform 1 collision
+        platform_rect = pygame.Rect(platform_x, platform_y, platform_width, platform_height)
+        player_rect = pygame.Rect(x, y, width, height)
+
+        if vel_y > 0 and player_rect.colliderect(platform_rect):
+            if y + height <= platform_y + platform_height:
+                y = platform_y - height
+                vel_y = 0
+                on_ground = True
+
+                # Platform 2 collision
+        platform_rect2 = pygame.Rect(platform_x2, platform_y2, platform_width2, platform_height2)
+        player_rect = pygame.Rect(x, y, width, height)
+
+        if vel_y > 0 and player_rect.colliderect(platform_rect2):
+            if y + height <= platform_y2 + platform_height2:
+                y = platform_y2 - height
+                vel_y = 0
+                on_ground = True
+
+                # Grond tekenen
+        pygame.draw.rect(win, (0, 100, 0), (0, grond, 800, 600 - grond))
+
+        # Platform 1 tekenen
+        pygame.draw.rect(win, (0, 0, 0), (platform_x, platform_y, platform_width, platform_height))
+
+        # Platform 2 tekenen
+        pygame.draw.rect(win, (0, 0, 0), (platform_x2, platform_y2, platform_width2, platform_height2))
+
+        hitboxplayer = pygame.Rect(x, y, width, height)
+        pygame.draw.rect(win, (255, 0, 0), (x, y, width, height))
+
+        pygame.draw.rect(win, (255, 0, 0), (x2, y2, width2, height2))
+        hitboxvijand = pygame.Rect(x2, y2, width2, height2)
+
+        pygame.draw.rect(win, (255, 0, 255), (x3, y3, width3, height3))
+
+        teller += 1
+        if teller == 60:
+            x2 = random.randint(0, 750)
+            y2 = random.randint(0, int(grond) - height2)
+            teller = 0
+
+        if hitboxvijand.colliderect(hitboxplayer):
+            punten += 1
+            x2 = random.randint(0, 750)
+            y2 = random.randint(0, int(grond) - height2)
+
+        if width3 < 800:
+            width3 += 1
+        if width3 < 0:
+            gameover = True
+            width3 = 800
+
+        text = font.render('punten  ' + str(punten), True, (255, 255, 255), (0, 0, 255))
+        textRect = text.get_rect()
+        textRect.center = (400, 30)
+        win.blit(text, textRect)
+
+        pygame.display.update()
+    else:
+        win.fill((0, 0, 0))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            x2 = random.randint(0, 750)
+            y2 = random.randint(0, 550)
+            gameover = False
+
+        pygame.display.update()
+
+pygame.quit()
