@@ -1,1 +1,141 @@
+import random
+import pygame
 
+pygame.init()
+
+win = pygame.display.set_mode((800, 600))
+pygame.display.set_caption("rivierBotsing")
+
+font = pygame.font.Font('freesansbold.ttf', 42)
+
+punten = 0
+
+# speler
+x = 50
+y = 50
+width = 40
+height = 60
+vel = 5
+
+# zwaartekracht
+gravity = 0.5
+vel_y = 0
+on_ground = False
+grond = 550
+
+# camera
+camera_x = 0
+
+# platforms lijst
+platforms = [
+    pygame.Rect(100, 450, 200, 20),
+    pygame.Rect(500, 350, 200, 20)
+]
+
+# vijand
+x2 = 200
+y2 = 200
+width2 = 20
+height2 = 20
+
+teller = 0
+gameover = False
+
+clock = pygame.time.Clock()
+
+run = True
+while run:
+
+    clock.tick(60)
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            run = False
+
+    if gameover == False:
+
+        win.fill((135, 206, 235))
+
+        keys = pygame.key.get_pressed()
+
+        if keys[pygame.K_LEFT]:
+            x -= vel
+        if keys[pygame.K_RIGHT]:
+            x += vel
+
+        # springen
+        if keys[pygame.K_UP] and on_ground:
+            vel_y = -12
+
+        # zwaartekracht
+        vel_y += gravity
+        y += vel_y
+
+        on_ground = False
+
+        # grond collision
+        if y + height >= grond:
+            y = grond - height
+            vel_y = 0
+            on_ground = True
+
+        player_rect = pygame.Rect(x, y, width, height)
+
+        # platform collisions
+        for p in platforms:
+            if vel_y > 0 and player_rect.colliderect(p):
+                if y + height <= p.y + p.height:
+                    y = p.y - height
+                    vel_y = 0
+                    on_ground = True
+
+        # camera volgt speler
+        if x > 400:
+            camera_x = x - 400
+
+        # nieuwe platforms genereren
+        if x > platforms[-1].x - 400:
+            nieuw_x = platforms[-1].x + random.randint(200, 400)
+            nieuw_y = random.randint(250, 500)
+            platforms.append(pygame.Rect(nieuw_x, nieuw_y, 200, 20))
+
+        # vijand laten verplaatsen
+        teller += 1
+        if teller >= 120:
+            x2 = random.randint(int(camera_x), int(camera_x + 800))
+            y2 = random.randint(0, grond - height2)
+            teller = 0
+
+        hitboxplayer = pygame.Rect(x, y, width, height)
+        hitboxvijand = pygame.Rect(x2, y2, width2, height2)
+
+        if hitboxvijand.colliderect(hitboxplayer):
+            punten += 1
+            x2 = random.randint(int(camera_x), int(camera_x + 800))
+            y2 = random.randint(0, grond - height2)
+
+        # grond tekenen
+        pygame.draw.rect(win, (0, 100, 0), (-camera_x, grond, 10000, 600 - grond))
+
+        # platforms tekenen
+        for p in platforms:
+            pygame.draw.rect(win, (0, 0, 0), (p.x - camera_x, p.y, p.width, p.height))
+
+        # speler tekenen
+        pygame.draw.rect(win, (255, 0, 0), (x - camera_x, y, width, height))
+
+        # vijand tekenen
+        pygame.draw.rect(win, (255, 0, 0), (x2 - camera_x, y2, width2, height2))
+
+        # score tekst
+        text = font.render('punten ' + str(punten), True, (255, 255, 255))
+        win.blit(text, (300, 20))
+
+        pygame.display.update()
+
+    else:
+
+        win.fill((0, 0, 0))
+        pygame.display.update()
+
+pygame.quit()
