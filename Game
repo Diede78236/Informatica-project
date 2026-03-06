@@ -7,6 +7,13 @@ win = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("rivierBotsing")
 
 font = pygame.font.Font('freesansbold.ttf', 42)
+text2 = font.render('Game Over', True, (255,0,0) )
+textRect2 = text2.get_rect()
+textRect2.center = (400, 250)
+text3 = font.render('(Press Space)', True, (255,255,255) )
+textRect3 = text3.get_rect()
+textRect3.center = (400, 300)
+
 
 punten = 0
 
@@ -28,8 +35,8 @@ camera_x = 0
 
 # platforms lijst
 platforms = [
-    pygame.Rect(100, 450, 200, 20),
-    pygame.Rect(500, 350, 200, 20)
+    pygame.Rect(50, 450, 200, 20),
+    pygame.Rect(450, 350, 200, 20)
 ]
 
 # vijand
@@ -118,7 +125,7 @@ while run:
         # grond tekenen
         pygame.draw.rect(win, (0, 100, 0), (-camera_x, grond, 10000, 600 - grond))
         if hitboxplayer.colliderect(hitboxgrond):
-            pygame.quit()
+            gameover = True
 
         # platforms tekenen
         for p in platforms:
@@ -137,8 +144,22 @@ while run:
         pygame.display.update()
 
     else:
-
         win.fill((0, 0, 0))
-        pygame.display.update()
+        text2 = font.render('Game Over', True, (255, 0, 0))
+        win.blit(text2, textRect2)
+        text3 = font.render('(Press Space)', True, (255, 255, 255))
+        win.blit(text3, textRect3)
+        punten = 0
 
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE]:
+            x = 50
+            y = 300
+            camera_x = 0
+            gameover = False
+
+        pygame.display.update()
 pygame.quit()
