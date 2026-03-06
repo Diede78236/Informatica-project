@@ -108,6 +108,7 @@ while run:
 
         hitboxplayer = pygame.Rect(x, y, width, height)
         hitboxvijand = pygame.Rect(x2, y2, width2, height2)
+        hitboxgrond = pygame.Rect(-camera_x -1, grond -1, 10000 -1, 600 - grond -1)
 
         if hitboxvijand.colliderect(hitboxplayer):
             punten += 1
@@ -116,6 +117,8 @@ while run:
 
         # grond tekenen
         pygame.draw.rect(win, (0, 100, 0), (-camera_x, grond, 10000, 600 - grond))
+        if hitboxplayer.colliderect(hitboxgrond):
+            pygame.quit()
 
         # platforms tekenen
         for p in platforms:
